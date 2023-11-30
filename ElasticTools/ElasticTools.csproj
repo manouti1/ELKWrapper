@@ -1,0 +1,21 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net6.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <Copyright>Mohammad Anouti</Copyright>
+    <Description>Elastic Search generic wrapper to do crud operations</Description>
+    <NuspecProperties>version=$(PackageVersion)</NuspecProperties>
+    <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
+    <GenerateDocumentationFile>True</GenerateDocumentationFile>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Elasticsearch.Net" Version="7.10.0" />
+    <PackageReference Include="NEST" Version="7.10.0" />
+    <PackageReference Include="NEST.JsonNetSerializer" Version="7.10.0" />
+    <PackageReference Include="System.Linq" Version="4.3.0" />
+  </ItemGroup>
+
+</Project>
