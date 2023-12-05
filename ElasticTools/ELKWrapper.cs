@@ -314,6 +314,44 @@ namespace ElasticTools
         }
 
         /// <summary>
+        /// Updates a document with optimistic concurrency in Elasticsearch.
+        /// </summary>
+        /// <param name="documentId">The ID of the document to update.</param>
+        /// <param name="updatedDocument">The updated document.</param>
+        public void UpdateDocumentConcurrently(string documentId, T updatedDocument)
+        {
+            try
+            {
+                var existingDocument = _client.Get<T>(documentId, g => g.Index(_indexName));
+
+                if (existingDocument.Found)
+                {
+                    var updateResponse = _client.Update<T, object>(documentId, u => u
+                        .Index(_indexName)
+                        .Doc(updatedDocument)
+                        .IfPrimaryTerm(existingDocument.PrimaryTerm)
+                        .IfSequenceNumber(existingDocument.SequenceNumber)
+                    );
+
+                    if (!updateResponse.IsValid || updateResponse.OriginalException != null)
+                    {
+                        HandleElasticsearchException(updateResponse, "Update document");
+                    }
+                }
+                else
+                {
+                    // Handle the case where the document is not found
+                    Console.WriteLine($"Document with ID {documentId} not found.");
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Exception during document update: {ex.Message}");
+                throw;
+            }
+        }
+
+        /// <summary>
         /// Performs an upsert operation for a document in Elasticsearch.
         /// </summary>
         /// <param name="documentId">The ID of the document to upsert.</param>

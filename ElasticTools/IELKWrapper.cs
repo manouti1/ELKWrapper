@@ -15,6 +15,7 @@ namespace ElasticTools
         T GetDocumentById(string documentId);
         void DeleteDocument(string documentId);
         void UpdateDocument(string documentId, T updatedDocument);
+        void UpdateDocumentConcurrently(string documentId, T updatedDocument);
         void UpsertDocument(string documentId, T updatedDocument);
         void CreateAlias(string aliasName, string indexName);
         void DeleteIndex(string indexName);
