@@ -131,7 +131,7 @@ namespace ELKTests
         }
 
         [TestMethod]
-        public void UpdateDocument_ShouldUpdateDocumentSuccessfully()
+        public async Task UpdateDocument_ShouldUpdateDocumentSuccessfullyAsync()
         {
             // Arrange
             var elkWrapper = new ELKWrapper<Person>(TestSettings, IndexName, IndexAlias);
@@ -146,18 +146,57 @@ namespace ELKTests
             personToUpdate.Age = 27; // Update the Age
             elkWrapper.UpdateDocument(id, personToUpdate);
             WaitForIndexing(elkWrapper, id);
+
             // Assert
-            var updatedPerson = elkWrapper.ScrollSearchAsync(
+            await Task.Delay(1000); // Adjust the delay based on your application's responsiveness
+
+            var updatedPerson = (await elkWrapper.ScrollSearchAsync(
                 q => q.MatchPhrase(t => t.Field(f => f.Name).Query("John Doe 2")),
                 s => s.Descending(f => f.Age),
                 pageSize: 1,
                 pageIndex: 0,
                 scrollTime: "1m"
-            ).Result.FirstOrDefault();
+            )).FirstOrDefault();
 
             // Use more specific assertions
             Assert.IsNotNull(updatedPerson, "Updated person should not be null.");
             Assert.AreEqual(personToUpdate.Age, updatedPerson?.Age, "Age should be updated successfully.");
+        }
+
+
+        [TestMethod]
+        public void UpdateDocumentConcurrently_ShouldUpdateDocument()
+        {
+            // Arrange
+            var person = new Person
+            {
+                Name = "John",
+                City = "Beirut",
+                Age = 30
+            };
+            var elkWrapper = new ELKWrapper<Person>(TestSettings, IndexName, IndexAlias);
+
+            var documentId = elkWrapper.IndexDocument(person);
+
+            // Act
+            var updatedPerson = new Person
+            {
+                Name = "UpdatedJohn",
+                City = "UpdateCity",
+                Age = 31
+            };
+
+            // Update the document
+            elkWrapper.UpdateDocumentConcurrently(documentId, updatedPerson);
+
+            // Assert
+            var retrievedPerson = elkWrapper.GetDocumentById(documentId);
+
+            // Add assertions to verify that the document is updated as expected
+            Assert.IsNotNull(retrievedPerson);
+            Assert.AreEqual(updatedPerson.Name, retrievedPerson.Name);
+            Assert.AreEqual(updatedPerson.City, retrievedPerson.City);
+            Assert.AreEqual(updatedPerson.Age, retrievedPerson.Age);
         }
 
         [TestMethod]
